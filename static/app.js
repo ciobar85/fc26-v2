@@ -495,7 +495,7 @@ async function captureImage() {
 }
 async function shareDownload(){try{const c=await captureImage();const a=document.createElement('a');a.download='fc26-pack.png';a.href=c.toDataURL('image/png');a.click();}catch(e){alert('Errore: '+e.message);}}
 function shareWhatsApp(){window.open(`https://wa.me/?text=${encodeURIComponent(`🎮 Ho aperto un pacchetto FC26!\nUnisciti: ${APP_URL}?room=${state.roomCode||''}`)}`, '_blank');}
-function shareEmail(){window.location.href=`mailto:?subject=${encodeURIComponent('FC26 Pack!')}&body=${encodeURIComponent(`Ho aperto un pacchetto!\nUnisciti: ${APP_URL}?room=${state.roomCode||''}`)}`);}
+function shareEmail(){window.location.href=`mailto:?subject=${encodeURIComponent('FC26 Pack!')}&body=${encodeURIComponent('Ho aperto un pacchetto!\nUnisciti: '+APP_URL+'?room='+(state.roomCode||''))}`;}
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 function init() {
