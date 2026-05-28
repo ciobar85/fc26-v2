@@ -1,6 +1,4 @@
-import eventlet
-eventlet.monkey_patch()
-
+# NIENTE eventlet — usiamo threading mode (compatibile Python 3.13)
 import json, os, random, string, traceback
 from pathlib import Path
 from typing import Dict, List
@@ -16,7 +14,14 @@ STATIC_DIR = BASE_DIR / "static"
 DATA_PATH  = BASE_DIR / "data" / "players.json"
 
 app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet", logger=False, engineio_logger=False)
+# threading mode: nessun monkey-patch, funziona su Python 3.13
+socketio = SocketIO(
+    app,
+    cors_allowed_origins="*",
+    async_mode="threading",
+    logger=False,
+    engineio_logger=False,
+)
 
 def _load():
     with open(DATA_PATH, "r", encoding="utf-8") as f:
@@ -29,7 +34,6 @@ except Exception as e:
     print(f"[FC26] ERRORE: {e}", flush=True)
     PLAYERS = []
 
-# --- Stanze in memoria ---
 rooms: Dict[str, dict] = {}
 
 def gen_code():
@@ -144,4 +148,4 @@ def static_files(filename): return send_from_directory(str(STATIC_DIR), filename
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    socketio.run(app, host="0.0.0.0", port=port, debug=False)
+    socketio.run(app, host="0.0.0.0", port=port, debug=False, use_reloader=False)
