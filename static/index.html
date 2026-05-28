@@ -8,12 +8,26 @@
 </head>
 <body>
 
+<!-- ===== LOGIN (prima visita) ===== -->
+<div id="screen-login" class="login-overlay hidden">
+  <div class="login-card">
+    <div class="login-logo">⚽</div>
+    <h2>FC26 PACK OPENER</h2>
+    <p class="login-sub">Inserisci il tuo nome per iniziare</p>
+    <input id="login-name" type="text" placeholder="Il tuo nome..." maxlength="20"
+      onkeydown="if(event.key==='Enter') doLogin()">
+    <button class="btn-login" onclick="doLogin()">Inizia →</button>
+    <div id="login-error" class="login-error hidden">Inserisci almeno 2 caratteri</div>
+  </div>
+</div>
+
 <!-- ===== LOBBY ===== -->
-<div id="screen-lobby">
+<div id="screen-lobby" class="hidden">
   <div class="lobby-card">
     <div class="lobby-logo">⚽</div>
     <h1>FC26 PACK OPENER</h1>
     <p class="lobby-sub">Apri pacchetti in diretta con i tuoi amici</p>
+    <div class="lobby-user" id="lobby-user"></div>
 
     <button class="btn-create" onclick="createRoom()">🎁 Crea Nuova Stanza</button>
 
@@ -39,23 +53,22 @@
   <header>
     <span class="logo">⚽</span>
     <h1>FC26 PACK OPENER</h1>
-
-    <!-- Room bar -->
-    <div class="room-bar" id="room-bar">
-      <span class="live-dot"></span>
-      <span class="live-txt">LIVE</span>
+    <div class="room-bar">
+      <span class="live-dot"></span><span class="live-txt">LIVE</span>
       <span class="room-code-lbl">Stanza:</span>
       <span class="room-code-val" id="hdr-code">—</span>
-      <span class="members-lbl" id="hdr-members">👥 1</span>
-      <button class="btn-copy" onclick="copyLink()" title="Copia link stanza">🔗 Copia Link</button>
+      <div class="members-wrap">
+        <span class="members-lbl" id="hdr-members" onclick="toggleMembersList()">👥 1</span>
+        <div class="members-popup hidden" id="members-popup"></div>
+      </div>
+      <button class="btn-copy" onclick="copyLink()">🔗 Copia Link</button>
     </div>
-
     <div id="hdr-role"></div>
   </header>
 
   <div class="layout">
 
-    <!-- SIDEBAR (solo host) -->
+    <!-- SIDEBAR (host) -->
     <aside class="sidebar" id="sidebar">
 
       <div class="section">
@@ -76,7 +89,7 @@
             <label>Ruolo</label>
             <select id="sel-pos">
               <option value="">Tutti i ruoli</option>
-              <optgroup label="Portieri"><option value="GK">GK — Portiere</option></optgroup>
+              <optgroup label="Portieri"><option value="GK">GK</option></optgroup>
               <optgroup label="Difensori">
                 <option value="CB">CB</option><option value="LB">LB</option>
                 <option value="RB">RB</option><option value="LWB">LWB</option><option value="RWB">RWB</option>
@@ -109,6 +122,25 @@
         </div>
       </div>
 
+      <!-- RICERCA MANUALE GIOCATORI -->
+      <div class="section">
+        <div class="section-title collapsible-hdr" onclick="toggleSection('s-search','a-search')">
+          Escludi Giocatori <span id="excl-badge" class="badge hidden">0</span>
+          <span class="arrow" id="a-search">▶</span>
+        </div>
+        <div class="collapsible" id="s-search">
+          <p class="hint" style="margin-bottom:8px">Cerca e aggiungi giocatori già selezionati in precedenza.</p>
+          <div class="search-wrap">
+            <input id="player-search-input" type="text" class="search-input"
+              placeholder="🔍 Cerca giocatore..."
+              oninput="onSearchInput(this.value)"
+              onblur="setTimeout(hideSearchResults,200)">
+            <div id="search-results" class="search-results hidden"></div>
+          </div>
+          <div id="manual-excl-list" class="manual-excl-list"></div>
+        </div>
+      </div>
+
       <div class="section">
         <div class="section-title collapsible-hdr" onclick="toggleSection('s-rosters','a-rosters')">
           Rose Escluse <span class="arrow" id="a-rosters">▶</span>
@@ -126,7 +158,7 @@
           <span class="arrow" id="a-squad">▶</span>
         </div>
         <div class="collapsible" id="s-squad">
-          <p class="hint" style="margin-bottom:10px">Giocatori aggiunti esclusi dalle prossime estrazioni.</p>
+          <p class="hint" style="margin-bottom:8px">Giocatori aggiunti → esclusi dalle prossime estrazioni.</p>
           <div id="squad-list" class="squad-list"></div>
           <button class="btn-clear" onclick="clearSquad()">🗑 Svuota Rosa</button>
         </div>
@@ -150,17 +182,6 @@
       </div>
     </main>
 
-  </div>
-</div>
-
-<!-- Modal squadra completa -->
-<div class="modal-overlay hidden" id="modal-overlay" onclick="closeModal()">
-  <div class="modal" onclick="event.stopPropagation()">
-    <div class="modal-header">
-      <h2>La mia Rosa</h2>
-      <button onclick="closeModal()">✕</button>
-    </div>
-    <div class="modal-body" id="modal-body"></div>
   </div>
 </div>
 
