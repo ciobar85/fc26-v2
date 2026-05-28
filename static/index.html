@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FC26 Pack Opener</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<header>
+  <span class="logo">⚽</span>
+  <h1>FC26 PACK OPENER</h1>
+  <span class="header-badge">LIVE</span>
+</header>
+
+<div class="layout">
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar" id="sidebar">
+
+    <!-- Range Overall -->
+    <div class="section">
+      <div class="section-title">Range Overall</div>
+      <div class="row2">
+        <div class="field">
+          <label>Min OVR</label>
+          <input type="number" id="ovr-min" value="75" min="47" max="91">
+        </div>
+        <div class="field">
+          <label>Max OVR</label>
+          <input type="number" id="ovr-max" value="82" min="47" max="91">
+        </div>
+      </div>
+      <div class="hint">⚡ OVR più alto = priorità maggiore nell'estrazione</div>
+    </div>
+
+    <!-- Filtri avanzati -->
+    <div class="section">
+      <div class="section-title collapsible-hdr" onclick="toggleSection('s-filters','a-filters')">
+        Filtri Avanzati <span class="arrow" id="a-filters">▶</span>
+      </div>
+      <div class="collapsible" id="s-filters">
+        <div class="field" style="margin-bottom:12px">
+          <label>Ruolo</label>
+          <select id="sel-pos">
+            <option value="">Tutti i ruoli</option>
+            <optgroup label="Portieri"><option value="GK">GK — Portiere</option></optgroup>
+            <optgroup label="Difensori">
+              <option value="CB">CB — Difensore Centrale</option>
+              <option value="LB">LB — Terzino Sinistro</option>
+              <option value="RB">RB — Terzino Destro</option>
+              <option value="LWB">LWB — Ala Difensiva Sin.</option>
+              <option value="RWB">RWB — Ala Difensiva Des.</option>
+            </optgroup>
+            <optgroup label="Centrocampisti">
+              <option value="CDM">CDM — Mediano</option>
+              <option value="CM">CM — Centrocampista</option>
+              <option value="CAM">CAM — Trequartista</option>
+              <option value="LM">LM — Mezzala Sinistra</option>
+              <option value="RM">RM — Mezzala Destra</option>
+            </optgroup>
+            <optgroup label="Attaccanti">
+              <option value="LW">LW — Ala Sinistra</option>
+              <option value="RW">RW — Ala Destra</option>
+              <option value="CF">CF — Prima Punta</option>
+              <option value="ST">ST — Centravanti</option>
+            </optgroup>
+          </select>
+        </div>
+        <div class="stat-label">Stats minime <span id="stat-type">(outfield)</span></div>
+        <div class="stat-grid" id="stat-grid"><!-- popolato da JS --></div>
+      </div>
+    </div>
+
+    <!-- Pacchetto -->
+    <div class="section">
+      <div class="section-title">Pacchetto</div>
+      <div class="field">
+        <label>Numero di carte</label>
+        <input type="number" id="num-cards" value="5" min="1" max="20">
+      </div>
+      <div class="toggle-row">
+        <span>Includi portieri</span>
+        <label class="toggle"><input type="checkbox" id="tog-gk" checked><span class="knob"></span></label>
+      </div>
+      <div class="toggle-row">
+        <span>Escludi già estratti</span>
+        <label class="toggle"><input type="checkbox" id="tog-excl" checked><span class="knob"></span></label>
+      </div>
+    </div>
+
+    <!-- Rose escluse -->
+    <div class="section">
+      <div class="section-title collapsible-hdr" onclick="toggleSection('s-rosters','a-rosters')">
+        Rose Escluse <span class="arrow" id="a-rosters">▶</span>
+      </div>
+      <div class="collapsible" id="s-rosters">
+        <p class="hint" style="margin-bottom:10px">Carica file .json con la rosa della tua squadra per escluderla dalle estrazioni.</p>
+        <label class="upload-lbl">
+          📂 Carica Rosa (.json)
+          <input type="file" id="roster-input" accept=".json" multiple>
+        </label>
+        <div id="roster-list"></div>
+      </div>
+    </div>
+
+    <!-- La mia rosa -->
+    <div class="section">
+      <div class="section-title collapsible-hdr" onclick="toggleSection('s-squad','a-squad')">
+        La mia Rosa
+        <span id="squad-badge" class="badge hidden">0</span>
+        <span class="arrow" id="a-squad">▶</span>
+      </div>
+      <div class="collapsible" id="s-squad">
+        <p class="hint" style="margin-bottom:10px">Aggiungi giocatori estratti alla rosa: saranno esclusi dalle prossime estrazioni (se attivato sopra).</p>
+        <div id="squad-list" class="squad-list"></div>
+        <button class="btn-clear" id="btn-clear-squad" onclick="clearSquad()">🗑 Svuota Rosa</button>
+      </div>
+    </div>
+
+    <!-- Pool -->
+    <div class="section">
+      <div class="section-title">Pool Disponibile</div>
+      <div class="pool-box" id="pool-box">Calcolo...</div>
+    </div>
+
+    <button class="btn-open" id="btn-open" onclick="openPack()">🎁 APRI PACCHETTO</button>
+
+  </aside>
+
+  <!-- ===== AREA GIOCO ===== -->
+  <main class="play-area" id="play-area">
+    <div class="idle">
+      <div class="idle-icon">🎁</div>
+      <p>Configura il pacchetto e premi<br><strong>APRI PACCHETTO</strong></p>
+    </div>
+  </main>
+
+</div>
+
+<!-- Modal rosa completa -->
+<div class="modal-overlay hidden" id="modal-overlay" onclick="closeModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h2>La mia Rosa</h2>
+      <button onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="/static/app.js"></script>
+</body>
+</html>
